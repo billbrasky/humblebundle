@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
 # humblebundle - Manager for Humble Bundle games and bundles
@@ -200,16 +200,18 @@ class HumbleBundle(httpbot.HttpBot):
         self.games   = {}
 
         # Get the keys
-        log.info("Retrieving keys from '%s/home/keys'", self.url)
-        match = re.search(r'^.*gamekeys\s*=\s*(\[.*\])',
-                          self.get('/home/keys').read().decode('utf-8'),
+        log.info("Retrieving keys from '%s/api/v1/user/oder'", self.url)
+        print( self.get('/api/v1/user/order').read().decode('utf-8') )
+        match = re.findall(r'^"gamekey":\s*"(.*?)"',
+                          self.get('/api/v1/user/order').read().decode('utf-8'),
                           re.MULTILINE)
-        if not match:
+        if not match or match == []:
             raise HumbleBundleError("GameKeys list not found")
 
         # Loop the bundles
         queue = Queue.Queue()
-        keys = json.loads(match.groups()[0])
+        print( match )
+        keys = match#json.loads(match.groups()[0])
         for key in keys:
             t = threading.Thread(target=self._load_key, args=(key, True, queue))
             t.daemon = True
